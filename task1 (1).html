@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>양팔 저울 - 과제 1</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding-top: 20px;
+      text-align: center;
+      background-color: #ffecec;
+      user-select: none;
+      transition: background-color 0.5s;
+    }
+
+    .wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .balance-container {
+      position: relative;
+      width: 80vw;
+      height: 60vh;
+    }
+
+    .beam-container {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 2vh;
+      transform-origin: center center;
+      transition: transform 0.5s;
+    }
+
+    .beam {
+      width: 100%;
+      height: 100%;
+      background-color: #4472C4;
+      position: relative;
+    }
+
+    .pivot {
+      position: absolute;
+      width: 2vw;
+      height: 12vh;
+      background-color: #4472C4;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 52%;
+      z-index: 2;
+    }
+
+    .base {
+      position: absolute;
+      width: 20vw;
+      height: 3vh;
+      background-color: #4472C4;
+      left: 50%;
+      top: 75%;
+      transform: translateX(-50%);
+    }
+
+    .scale {
+      position: absolute;
+      width: 16vw;
+      height: 8vh;
+      background-color: white;
+      border: 3px solid #aaa;
+      border-top: none;
+      border-radius: 0 0 50% 50%;
+      overflow: visible;
+      top: -7.5vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #leftScale {
+      left: 3vw;
+    }
+
+    #rightScale {
+      right: 3vw;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60vh;
+      width: 15vw;
+      gap: 1px;
+    }
+
+    #leftSlider {
+      accent-color: #3fa9f5; /* 파랑 계열 */
+    }
+
+    #rightSlider {
+      accent-color: #ff7f00; /* 빨강 계열 */
+    }
+
+    .slider {
+      writing-mode: bt-lr;
+      transform: rotate(270deg);
+      width: 50vh;
+      height: 5vh;
+    }
+
+    .weight-block {
+      position: absolute;
+      width: 1.5vh;
+      height: 1.5vh;
+      border-radius: 10%;
+    }
+
+    .left-block {
+      background-color: #3fa9f5;
+    }
+
+    .right-block {
+      background-color: #f56c6c;
+    }
+
+    /* 내비게이션 버튼 스타일 */
+    .next-button {
+      position: fixed;
+      right: 10px;
+      bottom: 10px;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      font-family: sans-serif;
+      font-size: 16px;
+    }
+    .next-button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>양팔 저울</h1>
+
+  <div class="wrapper">
+    <div class="slider-container">
+      <input type="range" id="leftSlider" class="slider" min="0" max="20" value="0">
+    </div>
+
+    <div class="balance-container">
+      <div class="beam-container" id="beamContainer">
+        <div class="beam" id="beam"></div>
+        <div class="scale" id="leftScale"></div>
+        <div class="scale" id="rightScale"></div>
+      </div>
+      <div class="pivot"></div>
+      <div class="base"></div>
+    </div>
+
+    <div class="slider-container">
+      <input type="range" id="rightSlider" class="slider" min="0" max="20" value="0">
+    </div>
+  </div>
+
+  <script>
+    let leftWeight = 0;
+    let rightWeight = 0;
+
+    function updateBlocks(scaleId, weight, isLeft) {
+      const scale = document.getElementById(scaleId);
+      scale.querySelectorAll('.weight-block').forEach(el => el.remove());
+
+      const blockSize = 18;
+      for (let i = 0; i < weight; i++) {
+        const block = document.createElement('div');
+        block.className = 'weight-block ' + (isLeft ? 'left-block' : 'right-block');
+        const x = (i % 10) * blockSize + 10;
+        const y = Math.abs(Math.floor(i / 10)-1) * blockSize + 10;
+        block.style.left = `${x}px`;
+        block.style.top = `${y}px`;
+        scale.appendChild(block);
+      }
+    }
+
+    function updateBalance() {
+      const beamContainer = document.getElementById('beamContainer');
+      const diff = leftWeight - rightWeight;
+      const maxAngle = 15;
+      const angle = Math.max(-maxAngle, Math.min(maxAngle, -diff * 2));
+      beamContainer.style.transform = `rotate(${angle}deg)`;
+
+      if (Math.abs(diff) <= 0) {
+        document.body.style.backgroundColor = '#d7ffd7';
+      } else {
+        document.body.style.backgroundColor = '#ff0000';
+      }
+    }
+
+    document.getElementById('leftSlider').addEventListener('input', (e) => {
+      leftWeight = parseInt(e.target.value);
+      updateBlocks('leftScale', leftWeight, true);
+      updateBalance();
+    });
+
+    document.getElementById('rightSlider').addEventListener('input', (e) => {
+      rightWeight = parseInt(e.target.value);
+      updateBlocks('rightScale', rightWeight, false);
+      updateBalance();
+    });
+
+    updateBlocks('leftScale', 0, true);
+    updateBlocks('rightScale', 0, false);
+    updateBalance();
+  </script>
+
+  <!-- 과제 2 페이지로 이동하는 [다음] 버튼 -->
+  <a class="next-button" href="task2.html">다음</a>
+</body>
+</html>
